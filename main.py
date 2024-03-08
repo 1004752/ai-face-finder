@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 import uvicorn
 import shutil
 import os
-from find_faces_insert_text import main as process_images  # 이 부분은 실제 구현에 따라 달라질 수 있음
+from .find_faces_insert_text import main as process_images  # 이 부분은 실제 구현에 따라 달라질 수 있음
 
 app = FastAPI()
 

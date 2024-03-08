@@ -164,7 +164,7 @@ def main(source_image_path, target_image_path):
         source_encodings.append(source_encoding)
 
     # 방법1: 오픈소스 이용
-    # match_opensource(source_image_path, target_image_path, source_encodings, font_path)
+    match_opensource(source_image_path, target_image_path, source_encodings, font_path)
 
     # 방법2: OpenAI 이용
-    match_openai(source_image_path, target_image_path, font_path)
+    # match_openai(source_image_path, target_image_path, font_path)
