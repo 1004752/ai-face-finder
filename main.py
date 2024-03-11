@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 import uvicorn
 import shutil
 import os
-from find_faces_insert_text import match_opensource, match_openai
+from .find_faces_insert_text import match_opensource, match_openai
 
 app = FastAPI()
 
