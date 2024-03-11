@@ -3,14 +3,16 @@ from fastapi.responses import FileResponse
 import uvicorn
 import shutil
 import os
-from .find_faces_insert_text import main as process_images  # 이 부분은 실제 구현에 따라 달라질 수 있음
+from find_faces_insert_text import main as process_images  # 이 부분은 실제 구현에 따라 달라질 수 있음
 
 app = FastAPI()
+
+app_path = os.getenv('APP_PATH')
 
 
 @app.post("/process-images/")
 async def create_upload_files(source_image: UploadFile = File(...), target_image: UploadFile = File(...)):
-    temp_dir = './temp'
+    temp_dir = f"{app_path}/temp"
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
@@ -24,7 +26,7 @@ async def create_upload_files(source_image: UploadFile = File(...), target_image
 
     try:
         process_images(source_image_path, target_image_path)
-        modified_image_path = "./find_faces/modified_" + os.path.basename(target_image_path)
+        modified_image_path = f"{app_path}/find_faces/modified_" + os.path.basename(target_image_path)
         return FileResponse(modified_image_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Processing error: {e}")

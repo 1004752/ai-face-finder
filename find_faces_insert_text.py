@@ -14,6 +14,7 @@ load_dotenv()
 openai.api_key = os.environ["OPENAI_API_KEY"]
 client = openai.OpenAI()
 
+app_path = os.getenv('APP_PATH')
 
 def load_image_and_encode(file_path):
     """이미지를 로드하고 얼굴 인코딩을 반환합니다. 얼굴을 찾지 못한 경우 None을 반환합니다."""
@@ -52,7 +53,7 @@ def match_opensource(source_image_path, target_image_path, source_encodings, fon
             text = get_pure_filename(source_image_path)
             draw.text((left, bottom + 10), text, fill="red", font=font)
 
-    pil_image.save("./find_faces/modified_" + os.path.basename(target_image_path))
+    pil_image.save(f"{app_path}/find_faces/modified_" + os.path.basename(target_image_path))
     # pil_image.show()
 
 
@@ -67,12 +68,12 @@ def match_openai(source_image_path, target_image_path, font_path):
     for index, face_location in enumerate(face_locations):
         # 얼굴 인코딩 추출 시 얼굴 위치 명시적으로 전달
         top, right, bottom, left = face_location
-        target_face_image_path = f"find_faces/face_{index}.jpg"
+        target_face_image_path = f"{app_path}/find_faces/face_{index}.jpg"
 
         # 추출한 얼굴 이미지 접근
         face_image = target_image[top:bottom, left:right]
         face_pil_image = Image.fromarray(face_image)
-        face_pil_image.save(f"find_faces/face_{index}.jpg")
+        face_pil_image.save(f"{app_path}/find_faces/face_{index}.jpg")
 
         image_sources = [source_image_path, target_face_image_path]
         prompt = "첫번째 이미지와 두번째 이미지의 사람이 동일한 사람인지 'YES' 또는 'NO'로만 답해주세요."
@@ -83,7 +84,7 @@ def match_openai(source_image_path, target_image_path, font_path):
             text = get_pure_filename(source_image_path)
             draw.text((left, bottom + 10), text, fill="red", font=font)
 
-    pil_image.save("./find_faces/modified_" + os.path.basename(target_image_path))
+    pil_image.save(f"{app_path}/find_faces/modified_" + os.path.basename(target_image_path))
     pil_image.show()
 
 
@@ -156,7 +157,9 @@ def get_pure_filename(file_path):
 def main(source_image_path, target_image_path):
     # source_image_path = "./phase2/man1.jpeg"
     # target_image_path = "./phase2/all_people_org.jpeg"
-    font_path = "/Users/1004752/IdeaProjects/store-chatbot/env/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSerif-Bold.ttf"  # 실제 폰트 경로로 수정 필요
+    font_path = os.getenv('FONT_PATH')
+    font_file_name = os.getenv('FONT_FILE_NAME')
+    font_path = f"{font_path}/{font_file_name}"  # 실제 폰트 경로로 수정 필요
 
     source_encodings = []
     _, source_encoding = load_image_and_encode(source_image_path)
