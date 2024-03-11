@@ -26,7 +26,16 @@ def load_image_and_encode(file_path):
         return image, None  # 얼굴 인코딩이 없는 경우 None 반환
 
 
-def match_opensource(source_image_path, target_image_path, source_encodings, font_path):
+def match_opensource(source_image_path, target_image_path):
+    font_path = os.getenv('FONT_PATH')
+    font_file_name = os.getenv('FONT_FILE_NAME')
+    font_path = f"{font_path}/{font_file_name}"
+
+    source_encodings = []
+    _, source_encoding = load_image_and_encode(source_image_path)
+    if source_encoding is not None:  # source_encoding이 None이 아닐 때만 처리
+        source_encodings.append(source_encoding)
+
     target_image = face_recognition.load_image_file(target_image_path)
     face_locations = face_recognition.face_locations(target_image)
 
@@ -57,7 +66,11 @@ def match_opensource(source_image_path, target_image_path, source_encodings, fon
     # pil_image.show()
 
 
-def match_openai(source_image_path, target_image_path, font_path):
+def match_openai(source_image_path, target_image_path):
+    font_path = os.getenv('FONT_PATH')
+    font_file_name = os.getenv('FONT_FILE_NAME')
+    font_path = f"{font_path}/{font_file_name}"
+
     target_image = face_recognition.load_image_file(target_image_path)
     face_locations = face_recognition.face_locations(target_image)
 
@@ -85,7 +98,7 @@ def match_openai(source_image_path, target_image_path, font_path):
             draw.text((left, bottom + 10), text, fill="red", font=font)
 
     pil_image.save(f"{app_path}/find_faces/modified_" + os.path.basename(target_image_path))
-    pil_image.show()
+    # pil_image.show()
 
 
 def load_and_encode_images(image_sources):
@@ -151,23 +164,3 @@ def display_response(pil_images, response_text):
 def get_pure_filename(file_path):
     """파일 경로에서 폴더와 확장자를 제외한 순수 파일명을 반환합니다."""
     return os.path.splitext(os.path.basename(file_path))[0]
-
-
-# 메인 로직
-def main(source_image_path, target_image_path):
-    # source_image_path = "./phase2/man1.jpeg"
-    # target_image_path = "./phase2/all_people_org.jpeg"
-    font_path = os.getenv('FONT_PATH')
-    font_file_name = os.getenv('FONT_FILE_NAME')
-    font_path = f"{font_path}/{font_file_name}"  # 실제 폰트 경로로 수정 필요
-
-    source_encodings = []
-    _, source_encoding = load_image_and_encode(source_image_path)
-    if source_encoding is not None:  # source_encoding이 None이 아닐 때만 처리
-        source_encodings.append(source_encoding)
-
-    # 방법1: 오픈소스 이용
-    match_opensource(source_image_path, target_image_path, source_encodings, font_path)
-
-    # 방법2: OpenAI 이용
-    # match_openai(source_image_path, target_image_path, font_path)

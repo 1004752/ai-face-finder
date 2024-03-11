@@ -1,9 +1,9 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse
 import uvicorn
 import shutil
 import os
-from .find_faces_insert_text import main as process_images  # 이 부분은 실제 구현에 따라 달라질 수 있음
+from find_faces_insert_text import match_opensource, match_openai
 
 app = FastAPI()
 
@@ -11,7 +11,11 @@ app_path = os.getenv('APP_PATH')
 
 
 @app.post("/process-images/")
-async def create_upload_files(source_image: UploadFile = File(...), target_image: UploadFile = File(...)):
+async def create_upload_files(
+        source_image: UploadFile = File(...),
+        target_image: UploadFile = File(...),
+        processing_method: str = Form(...)
+):
     temp_dir = f"{app_path}/temp"
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
@@ -25,7 +29,15 @@ async def create_upload_files(source_image: UploadFile = File(...), target_image
         shutil.copyfileobj(target_image.file, buffer)
 
     try:
-        process_images(source_image_path, target_image_path)
+        if processing_method == "1.오픈소스":
+            # 오픈소스 라이브러리를 사용한 얼굴 매칭 처리
+            match_opensource(source_image_path, target_image_path)
+        elif processing_method == "2.OpenAI":
+            # OpenAI API를 사용한 얼굴 매칭 처리
+            match_openai(source_image_path, target_image_path)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid processing method")
+
         modified_image_path = f"{app_path}/find_faces/modified_" + os.path.basename(target_image_path)
         return FileResponse(modified_image_path)
     except Exception as e:
