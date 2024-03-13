@@ -31,6 +31,19 @@ def match_opensource(source_image_path, target_image_path):
     font_file_name = os.getenv('FONT_FILE_NAME')
     font_path = f"{font_path}/{font_file_name}"
 
+    source_image = face_recognition.load_image_file(source_image_path)
+    face_locations = face_recognition.face_locations(source_image)
+
+    for index, face_location in enumerate(face_locations):
+        # 얼굴 인코딩 추출 시 얼굴 위치 명시적으로 전달
+        top, right, bottom, left = face_location
+
+        # 추출한 얼굴 이미지 접근
+        face_image = source_image[top:bottom, left:right]
+        face_pil_image = Image.fromarray(face_image)
+        face_pil_image.save(f"{app_path}/find_faces/new_source_{index}.jpg")
+        source_image_path = f"{app_path}/find_faces/new_source_{index}.jpg"
+
     source_encodings = []
     _, source_encoding = load_image_and_encode(source_image_path)
     if source_encoding is not None:  # source_encoding이 None이 아닐 때만 처리
@@ -45,22 +58,34 @@ def match_opensource(source_image_path, target_image_path):
 
     for index, face_location in enumerate(face_locations):
         # 얼굴 인코딩 추출 시 얼굴 위치 명시적으로 전달
-        _, _, bottom, left = face_location
+        top, right, bottom, left = face_location
         current_face_location = [face_location]  # 얼굴 위치를 리스트로 래핑
 
+        # 추출한 얼굴 이미지 접근
+        face_image = target_image[top:bottom, left:right]
+        face_pil_image = Image.fromarray(face_image)
+        face_pil_image.save(f"{app_path}/find_faces/face_{index}.jpg")
+
         # 얼굴 위치를 명시적으로 전달하여 얼굴 인코딩을 추출
-        current_face_encodings = face_recognition.face_encodings(target_image, known_face_locations=current_face_location)
+        current_face_encodings = face_recognition.face_encodings(face_image=target_image,
+                                                                 known_face_locations=current_face_location,
+                                                                 num_jitters=100,
+                                                                 model="large")
 
         if not current_face_encodings:  # 얼굴 인코딩을 찾지 못한 경우
             continue
 
-        match = face_recognition.compare_faces(known_face_encodings=source_encodings,
-                                               face_encoding_to_check=current_face_encodings[0])
+        match = face_recognition.compare_faces(source_encodings, current_face_encodings[0])
 
         if match[0]:
             # 일치하는 얼굴 발견 시 텍스트 그리기
             text = get_pure_filename(source_image_path)
             draw.text((left, bottom + 10), text, fill="red", font=font)
+
+        image_sources = [source_image_path, f"{app_path}/find_faces/face_{index}.jpg"]
+
+        _, pil_images = load_and_encode_images(image_sources)
+        display_response(pil_images, match[0])
 
     pil_image.save(f"{app_path}/find_faces/modified_" + os.path.basename(target_image_path))
     # pil_image.show()
