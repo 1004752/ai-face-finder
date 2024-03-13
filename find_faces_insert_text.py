@@ -34,6 +34,8 @@ def match_opensource(source_image_path, target_image_path):
     source_image = face_recognition.load_image_file(source_image_path)
     face_locations = face_recognition.face_locations(source_image)
 
+    source_org_file_name = get_pure_filename(source_image_path)
+
     for index, face_location in enumerate(face_locations):
         # 얼굴 인코딩 추출 시 얼굴 위치 명시적으로 전달
         top, right, bottom, left = face_location
@@ -41,8 +43,8 @@ def match_opensource(source_image_path, target_image_path):
         # 추출한 얼굴 이미지 접근
         face_image = source_image[top:bottom, left:right]
         face_pil_image = Image.fromarray(face_image)
-        face_pil_image.save(f"{app_path}/find_faces/new_source_{index}.jpg")
-        source_image_path = f"{app_path}/find_faces/new_source_{index}.jpg"
+        face_pil_image.save(f"{app_path}/find_faces/{source_org_file_name}.jpg")
+        source_image_path = f"{app_path}/find_faces/{source_org_file_name}.jpg"
 
     source_encodings = []
     _, source_encoding = load_image_and_encode(source_image_path)
