@@ -69,7 +69,7 @@ def match_opensource(source_image_path, target_image_path):
         # 얼굴 위치를 명시적으로 전달하여 얼굴 인코딩을 추출
         current_face_encodings = face_recognition.face_encodings(face_image=target_image,
                                                                  known_face_locations=current_face_location,
-                                                                 num_jitters=100,
+                                                                 num_jitters=20,
                                                                  model="large")
 
         if not current_face_encodings:  # 얼굴 인코딩을 찾지 못한 경우
